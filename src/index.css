@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Markdown answer rendering — kept minimal, matches the help-centre type scale */
+@layer components {
+  .prose-faq {
+    @apply text-fg-secondary text-[15px] leading-relaxed;
+  }
+  .prose-faq h1, .prose-faq h2, .prose-faq h3, .prose-faq h4 {
+    @apply text-fg-primary font-semibold mt-4 mb-2;
+  }
+  .prose-faq h3 { @apply text-base; }
+  .prose-faq h4 { @apply text-sm; }
+  .prose-faq p { @apply my-2; }
+  .prose-faq a {
+    @apply text-fg-accent-primary underline underline-offset-2 hover:opacity-80;
+  }
+  .prose-faq ul, .prose-faq ol { @apply my-2 pl-5; }
+  .prose-faq ul { @apply list-disc; }
+  .prose-faq ol { @apply list-decimal; }
+  .prose-faq li { @apply my-1; }
+  .prose-faq code {
+    @apply bg-bg-layer3 px-1.5 py-0.5 rounded-sm text-[13px];
+  }
+  .prose-faq strong { @apply text-fg-primary font-semibold; }
+  .prose-faq blockquote {
+    @apply border-l-2 border-border-tertiary pl-3 italic my-3;
+  }
+}

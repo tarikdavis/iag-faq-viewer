@@ -21,15 +21,26 @@ export function Sidebar({ corpus, filters, onChange }: Props) {
     topicsByHub.set(t.hubId, list);
   }
 
-  // FAQ counts per hub + topic (post opco filter so the numbers match the main panel)
+  // FAQ counts per hub + topic (post opco filter so the numbers match the main panel).
+  // A FAQ counts toward every topic/hub it surfaces in — primary AND additional.
   const faqsAfterOpcoFilter = filters.opco
     ? corpus.faqs.filter((f) => f.applicableOpcos.includes(filters.opco!))
     : corpus.faqs;
   const hubCount = new Map<string, number>();
   const topicCount = new Map<string, number>();
   for (const f of faqsAfterOpcoFilter) {
-    if (f.hub) hubCount.set(f.hub.id, (hubCount.get(f.hub.id) ?? 0) + 1);
-    if (f.topic) topicCount.set(f.topic.id, (topicCount.get(f.topic.id) ?? 0) + 1);
+    // Track unique hubs/topics this FAQ surfaces in so we don't double-count
+    // if the same hub appears via primary + additional
+    const hubsThisFaq = new Set<string>();
+    const topicsThisFaq = new Set<string>();
+    if (f.hub) hubsThisFaq.add(f.hub.id);
+    if (f.topic) topicsThisFaq.add(f.topic.id);
+    for (const t of f.additionalTopics) {
+      topicsThisFaq.add(t.id);
+      hubsThisFaq.add(t.hubId);
+    }
+    for (const h of hubsThisFaq) hubCount.set(h, (hubCount.get(h) ?? 0) + 1);
+    for (const t of topicsThisFaq) topicCount.set(t, (topicCount.get(t) ?? 0) + 1);
   }
 
   const sortedHubs = [...corpus.hubs].sort((a, b) => loc(a.heading, 'en-GB').localeCompare(loc(b.heading, 'en-GB')));

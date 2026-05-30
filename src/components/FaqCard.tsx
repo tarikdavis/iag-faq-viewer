@@ -80,6 +80,11 @@ export function FaqCard({ faq, lang }: Props) {
                 {faq.topic && <span className="opacity-60"> › {loc(faq.topic.name, lang)}</span>}
               </span>
             )}
+            {faq.additionalTopics.length > 0 && (
+              <span className="text-[11px] text-fg-accent-primary">
+                + also in: {faq.additionalTopics.map((t) => loc(t.name, lang)).join(', ')}
+              </span>
+            )}
           </div>
         </div>
 

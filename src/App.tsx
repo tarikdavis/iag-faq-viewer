@@ -31,8 +31,18 @@ export function App() {
       if (filters.view === 'debug') return f.opcoInvalid;
 
       if (filters.opco && !f.applicableOpcos.includes(filters.opco)) return false;
-      if (filters.hubId && f.hub?.id !== filters.hubId) return false;
-      if (filters.topicId && f.topic?.id !== filters.topicId) return false;
+      // Hub filter: primary topic's hub OR any additionalTopic's hub
+      if (filters.hubId) {
+        const matchesPrimary = f.hub?.id === filters.hubId;
+        const matchesAdditional = f.additionalTopics.some((t) => t.hubId === filters.hubId);
+        if (!matchesPrimary && !matchesAdditional) return false;
+      }
+      // Topic filter: primary OR any additional
+      if (filters.topicId) {
+        const matchesPrimary = f.topic?.id === filters.topicId;
+        const matchesAdditional = f.additionalTopicIds.includes(filters.topicId);
+        if (!matchesPrimary && !matchesAdditional) return false;
+      }
       if (q) {
         const hay = [
           loc(f.question, filters.lang),

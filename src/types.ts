@@ -49,7 +49,8 @@ export interface Faq {
   answer: Localised<string>;
   searchSummary: Localised<string>;
   slug: string;
-  topicId: string | null;
+  topicId: string | null;            // canonical / primary topic
+  additionalTopicIds: string[];      // extra topic blocks the FAQ surfaces in
   applicableOpcos: OpcoId[];
   faqAriaLabel: Localised<string>;
   lastReviewedAt: string | null;
@@ -60,6 +61,7 @@ export interface Faq {
 export interface FaqWithContext extends Faq {
   topic: Topic | null;
   hub: Hub | null;
+  additionalTopics: Topic[];  // resolved entries for additionalTopicIds
   /** True when applicableOpcos is missing or empty — surfaces in debug view */
   opcoInvalid: boolean;
 }

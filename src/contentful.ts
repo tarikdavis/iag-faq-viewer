@@ -101,6 +101,23 @@ function readLink(v: unknown): string | null {
   return null;
 }
 
+function readLinks(v: unknown): string[] {
+  // Array-of-links fields: { 'en-GB': [{sys: {id: '...'}}, ...] }
+  let inner: unknown = v;
+  if (inner && typeof inner === 'object' && 'en-GB' in (inner as object)) {
+    inner = (inner as Record<string, unknown>)['en-GB'];
+  }
+  if (!Array.isArray(inner)) return [];
+  const out: string[] = [];
+  for (const item of inner) {
+    if (item && typeof item === 'object' && 'sys' in (item as object)) {
+      const sys = (item as { sys?: { id?: string } }).sys;
+      if (sys?.id) out.push(sys.id);
+    }
+  }
+  return out;
+}
+
 function readBoolean(v: unknown): boolean {
   let inner: unknown = v;
   if (inner && typeof inner === 'object' && 'en-GB' in (inner as object)) {
@@ -156,6 +173,7 @@ function normaliseFaq(e: CDAEntry): Faq {
     searchSummary: readLocalised<string>(f.searchSummary),
     slug: readString(f.slug) ?? '',
     topicId: readLink(f.topic),
+    additionalTopicIds: readLinks(f.additionalTopics),
     applicableOpcos: readOpcos(f.applicableOpcos),
     faqAriaLabel: readLocalised<string>(f.faqAriaLabel),
     lastReviewedAt: readString(f.lastReviewedAt),
@@ -183,10 +201,13 @@ export async function fetchCorpus(): Promise<ContentfulCorpus> {
   const faqs: FaqWithContext[] = rawFaqs.map((faq) => {
     const topic = faq.topicId ? topicById.get(faq.topicId) ?? null : null;
     const hub = topic ? hubById.get(topic.hubId) ?? null : null;
+    const additionalTopics = faq.additionalTopicIds
+      .map((id) => topicById.get(id))
+      .filter((t): t is NonNullable<typeof t> => t != null);
     const opcoInvalid =
       faq.applicableOpcos.length === 0 ||
       faq.applicableOpcos.some((o) => !VALID_OPCOS.has(o));
-    return { ...faq, topic, hub, opcoInvalid };
+    return { ...faq, topic, hub, additionalTopics, opcoInvalid };
   });
 
   // Sort topics by hub then order
